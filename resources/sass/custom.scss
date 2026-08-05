@@ -1,0 +1,86 @@
+// Bootstrap 5 custom
+@import '../../vendor/onpay/laravel-core/resources/sass/bootstrap-5-custom';
+
+// Custom
+html {
+    min-height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-y: scroll;
+}
+
+#app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.navbar-nav {
+    .nav-link {
+        &.active,
+        &.show,
+        &:hover {
+            color: var(--bs-navbar-active-color);
+            text-shadow:
+                0 0 0.01px currentColor,
+                0 0 0.01px currentColor;
+        }
+    }
+
+    .nav-item > .dropdown-menu > li {
+        & > .dropdown-item {
+            &.active,
+            &:active {
+                background-color: var(--bs-gray-200);
+                color: var(--bs-body-color);
+            }
+
+            &:hover {
+                background-color: var(--bs-gray-300);
+                color: var(--bs-body-color);
+            }
+        }
+    }
+}
+
+.page-header {
+    padding-bottom: 0.125rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 2px solid var(--bs-gray-700);
+    font-size: 1.75rem;
+}
+
+.footer {
+    margin-top: auto;
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--bs-gray-300);
+
+    div {
+        font-size: 0.9rem;
+        color: var(--bs-gray-600);
+        text-align: center;
+
+        @media (max-width: 480px) {
+            font-size: 0.8rem;
+        }
+    }
+}
+
+.card-badge {
+    position: absolute;
+    padding: 0.5rem 1rem;
+
+    &.top-0 {
+        &.start-0 {
+            border-radius: 0 0 0.75rem 0;
+        }
+
+        &.end-0 {
+            border-radius: 0 0 0 0.75rem;
+        }
+    }
+}

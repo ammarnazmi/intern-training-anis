@@ -1,0 +1,7 @@
+{
+    "useLaravelPint": true,
+    "classStrings": {
+        "enabled": false
+    },
+    "formatJsAttributes": false
+}

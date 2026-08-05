@@ -1,0 +1,3 @@
+{
+    "include": ["**/*.js", "../types/**/*.d.ts", "../../storage/framework/types/**/*.d.ts", "../../vendor/onpay/laravel-core/resources/types/**/*.d.ts"]
+}

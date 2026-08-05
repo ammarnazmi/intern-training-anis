@@ -1,0 +1,11 @@
+// Typography
+$font-family-sans-serif: 'Figtree', sans-serif;
+
+// Options
+$enable-negative-margins: true;
+
+// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+
+// Custom
+@import 'custom';

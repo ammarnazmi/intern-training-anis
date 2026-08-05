@@ -1,0 +1,784 @@
+// ============================================================
+// Sidebar Layout
+//
+// State lives in two classes on `.app-wrapper` -- `.is-collapsed` (desktop mini
+// rail) and `.is-mobile-open` (mobile drawer) -- plus `.is-open` per group.
+//
+// `--sidebar-w` is the only layout-affecting interpolation. Everything else is
+// compositor-only or confined to a submenu's own box.
+//
+// Avoid a descendant combinator before `:is()`: the view SCSS compiler drops
+// the space, silently turning it into a compound selector.
+// ============================================================
+
+// -- Variables ------------------------------------------------
+
+$sidebar-link-margin-x: 0.5rem !default;
+$sidebar-link-padding-x: 1rem !default;
+$sidebar-icon-width: 1.25rem !default;
+$sidebar-submenu-indent: 1.25rem !default;
+
+// Where the first-level guide line sits; each deeper level steps in by one indent
+$sidebar-guide-width: 1px !default;
+$sidebar-guide-inset: 0.75rem !default;
+
+// Submenu content edge to its links, and the per-level step with the border
+// discounted so nesting advances by exactly one indent
+$sidebar-submenu-link-offset: calc(#{$sidebar-submenu-indent} - #{$sidebar-guide-inset} - #{$sidebar-guide-width}) !default;
+$sidebar-submenu-step: calc(#{$sidebar-submenu-indent} - #{$sidebar-guide-width}) !default;
+
+// Fallback ceiling for browsers that cannot interpolate an intrinsic size
+$sidebar-submenu-max-height: 500px !default;
+
+$sidebar-width: 260px !default;
+
+// Derived so the icon stays optically centred without animating any link padding
+$sidebar-collapsed-width: ($sidebar-link-margin-x + $sidebar-link-padding-x) * 2 + $sidebar-icon-width !default;
+
+$sidebar-topbar-height: 56px !default;
+$sidebar-radius: 0.5rem !default;
+
+// Named because the collapsed flyouts clear it from outside the sidebar
+$sidebar-border-width: 1px !default;
+
+$sidebar-duration: 0.2s !default;
+$sidebar-duration-fast: 0.12s !default;
+$sidebar-easing: cubic-bezier(0.4, 0, 0.2, 1) !default;
+$sidebar-flyout-delay: 0.1s !default;
+
+$sidebar-breakpoint: 992px !default;
+$sidebar-breakpoint-max: 991.98px !default;
+
+$sidebar-z-backdrop: 1035 !default;
+$sidebar-z-sidebar: 1040 !default;
+$sidebar-z-flyout: 1050 !default;
+$sidebar-z-topbar: 1020 !default;
+
+// -- Design tokens --------------------------------------------
+
+.app-wrapper {
+    --sidebar-bg: var(--bs-body-bg);
+    --sidebar-text: var(--bs-secondary-color);
+    --sidebar-border: var(--bs-border-color);
+    --sidebar-guide: var(--bs-border-color);
+    --sidebar-hover-bg: var(--bs-gray-200);
+    --sidebar-control-bg: var(--bs-gray-100);
+    --sidebar-topbar-height: #{$sidebar-topbar-height};
+
+    // Published for the layout script, which cannot read a Sass variable
+    --sidebar-breakpoint-max: #{$sidebar-breakpoint-max};
+}
+
+// One interpolation driving both the sidebar width and the content offset, so
+// they cannot drift apart. `inherits: false` keeps per-frame invalidation on the
+// two consumers instead of the whole page subtree.
+@property --sidebar-w {
+    syntax: '<length>';
+    inherits: false;
+    initial-value: #{$sidebar-width};
+}
+
+// -- Wrapper --------------------------------------------------
+
+.app-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+// Scoped to the breakpoint so a viewport that widens past it is never left
+// locked with no drawer.
+@media (max-width: $sidebar-breakpoint-max) {
+    body:has(.app-wrapper.is-mobile-open) {
+        overflow: hidden;
+    }
+}
+
+// -- Sidebar --------------------------------------------------
+
+.app-sidebar,
+.app-main {
+    --sidebar-w: #{$sidebar-width};
+
+    transition: --sidebar-w #{$sidebar-duration} #{$sidebar-easing};
+}
+
+@media (min-width: $sidebar-breakpoint) {
+    .app-wrapper.is-collapsed .app-sidebar,
+    .app-wrapper.is-collapsed .app-main {
+        --sidebar-w: #{$sidebar-collapsed-width};
+    }
+}
+
+.app-sidebar {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: $sidebar-z-sidebar;
+    display: flex;
+    flex-direction: column;
+    width: var(--sidebar-w);
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    border-inline-end: $sidebar-border-width solid var(--sidebar-border);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+
+    // Reflow from the width change cannot escape the sidebar subtree
+    contain: layout paint;
+}
+
+// -- Sidebar header -------------------------------------------
+
+.app-sidebar-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    height: var(--sidebar-topbar-height);
+    padding: 0 $sidebar-link-padding-x;
+    border-bottom: 1px solid var(--sidebar-border);
+}
+
+.app-sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-width: 0;
+    color: var(--bs-body-color);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.app-sidebar-logo {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.app-sidebar-close {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--sidebar-border);
+    border-radius: 0.375rem;
+    background: var(--sidebar-control-bg);
+    color: var(--sidebar-text);
+    cursor: pointer;
+    transition:
+        color $sidebar-duration-fast linear,
+        background-color $sidebar-duration-fast linear;
+
+    &:hover {
+        color: var(--bs-body-color);
+        background-color: var(--sidebar-hover-bg);
+    }
+
+    @media (max-width: $sidebar-breakpoint-max) {
+        display: inline-flex;
+    }
+}
+
+.app-sidebar-badge {
+    position: absolute;
+    bottom: -0.45em;
+    inset-inline-start: $sidebar-link-padding-x;
+    z-index: 1;
+    padding: 0.2em 0.5em;
+    font-size: 0.55rem;
+    letter-spacing: 0.05em;
+}
+
+// -- Sidebar navigation ---------------------------------------
+
+.app-sidebar-nav {
+    flex: 1;
+    padding: 0.75rem 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.app-sidebar-links,
+.app-sidebar-submenu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li + li {
+        margin-top: 0.125rem;
+    }
+}
+
+// The guide line is the list's own inline-start border: it spans exactly the
+// children it groups, is clipped by the `overflow: hidden` below so it wipes in
+// and out with the accordion, and compounds without a depth counter.
+.app-sidebar-submenu {
+    border: 0 solid var(--sidebar-border);
+    border-inline-start-width: $sidebar-guide-width;
+    border-inline-start-color: var(--sidebar-guide);
+    margin-inline-start: $sidebar-guide-inset;
+}
+
+.app-sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: calc(100% - #{$sidebar-link-margin-x * 2});
+    padding: 0.625rem $sidebar-link-padding-x;
+    margin: 0 $sidebar-link-margin-x;
+    border: none;
+    border-radius: $sidebar-radius;
+    background: none;
+    color: var(--sidebar-text);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-align: start;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+
+    // Colour only. Geometry never animates, so this stays off the layout path.
+    transition:
+        color $sidebar-duration-fast linear,
+        background-color $sidebar-duration-fast linear;
+
+    &:hover {
+        color: var(--bs-body-color);
+        background-image: linear-gradient(to right, var(--sidebar-hover-bg), transparent);
+    }
+
+    &.active {
+        color: var(--bs-primary);
+        background-image: linear-gradient(to right, rgba(var(--bs-primary-rgb), 0.15), rgba(var(--bs-primary-rgb), 0.02));
+        font-weight: 600;
+    }
+}
+
+.app-sidebar-icon {
+    flex-shrink: 0;
+    width: $sidebar-icon-width;
+    font-size: 1rem;
+    text-align: center;
+}
+
+// Labels and arrows fade rather than resize: opacity is compositor-only, so
+// collapsing costs no layout per menu item.
+.app-sidebar-brand-text,
+.app-sidebar-link-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-sidebar-brand-text,
+.app-sidebar-link-text,
+.app-sidebar-arrow {
+    opacity: 1;
+    transition: opacity $sidebar-duration-fast $sidebar-easing $sidebar-duration-fast;
+}
+
+.app-sidebar-arrow {
+    margin-inline-start: auto;
+    font-size: 0.75rem;
+    transition:
+        opacity $sidebar-duration-fast $sidebar-easing $sidebar-duration-fast,
+        rotate $sidebar-duration $sidebar-easing;
+}
+
+// -- Groups and submenus --------------------------------------
+//
+// Nesting is unbounded and every level uses the same three classes:
+//
+//   li.app-sidebar-group          -> `is-open` holds this level's open state
+//     button.app-sidebar-link     -> the toggle (aria-expanded, set by script)
+//     ul.app-sidebar-submenu      -> the children, each one another group
+//
+// The rules below are descendant selectors, so a fourth level needs no new CSS.
+// Only two things are depth-limited: the `.active` tint stops lightening at the
+// grandchild, and in the rail every level past the first opens as a flyout.
+.app-sidebar-group {
+    &.is-open > .app-sidebar-link > .app-sidebar-arrow {
+        rotate: 90deg;
+    }
+
+    // Text only. A parent is active whenever anything below it is, so filling it
+    // too would read as one block bleeding through to the active child.
+    > .app-sidebar-link.active {
+        background-image: none;
+    }
+}
+
+.app-sidebar-submenu {
+    // The animation is this box and nothing else. Animating the parent's sizing
+    // instead makes every ancestor re-interpolate a value derived from this one,
+    // and those curves do not stay in step.
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height $sidebar-duration $sidebar-easing;
+
+    // Gap between the parent link and its first child
+    > li:first-child > .app-sidebar-link {
+        margin-top: 0.25rem;
+    }
+
+    // Indent compounds per level: each nested list is offset from its parent's
+    // content edge, so one rule works at any depth and carries its guide line
+    // with it. The border is discounted to keep the step at one indent.
+    .app-sidebar-submenu {
+        margin-inline-start: $sidebar-submenu-step;
+    }
+
+    .app-sidebar-link {
+        width: calc(100% - #{$sidebar-submenu-link-offset} - #{$sidebar-link-margin-x});
+        margin-inline-start: $sidebar-submenu-link-offset;
+        font-size: 0.875rem;
+    }
+
+    // Each nesting level sits lighter than its parent
+    .app-sidebar-link.active {
+        background-image: linear-gradient(to right, rgba(var(--bs-primary-rgb), 0.1), rgba(var(--bs-primary-rgb), 0.02));
+    }
+
+    .app-sidebar-submenu .app-sidebar-link.active {
+        background-image: linear-gradient(to right, rgba(var(--bs-primary-rgb), 0.06), rgba(var(--bs-primary-rgb), 0.02));
+    }
+}
+
+.app-sidebar-group.is-open > .app-sidebar-submenu {
+    max-height: $sidebar-submenu-max-height;
+}
+
+// Where the browser can interpolate an intrinsic size the ceiling stops being a
+// guess. `max-content` rather than a measured length keeps the clamp loose, so a
+// group opening inside this one still just pushes it taller.
+@supports (interpolate-size: allow-keywords) {
+    .app-wrapper {
+        interpolate-size: allow-keywords;
+    }
+
+    .app-sidebar-group.is-open > .app-sidebar-submenu {
+        max-height: max-content;
+    }
+}
+
+// Clipping hides a submenu from the eye only; `visibility` is what takes its
+// links out of the tab order, held off until the collapse has finished.
+//
+// Spelled as the closed case rather than a matching `visible` on the open one,
+// because `visibility` inherits: never restating `visible` lets the outermost
+// closed level speak for everything beneath it, at any depth.
+.app-sidebar-group:not(.is-open) > .app-sidebar-submenu {
+    visibility: hidden;
+    transition:
+        max-height $sidebar-duration $sidebar-easing,
+        visibility 0s linear $sidebar-duration;
+}
+
+// -- Collapsed rail (desktop only) ----------------------------
+
+@media (min-width: $sidebar-breakpoint) {
+    .app-wrapper.is-collapsed {
+        .app-sidebar {
+            // `contain: paint` would make the rail the containing block for the
+            // fixed flyouts below, pulling them back inside the box they escape
+            contain: none;
+            overflow: visible;
+        }
+
+        // Fade out on collapse, back in only once the rail has widened, so text
+        // never spills past the edge mid-transition. The badge is deliberately
+        // left out: it stays readable while collapsed so the area is still
+        // obvious at a glance, even where a long translation overhangs the rail
+        .app-sidebar-brand-text,
+        .app-sidebar-link-text,
+        .app-sidebar-arrow {
+            opacity: 0;
+            transition-delay: 0s;
+        }
+
+        // Groups stop being accordions and become hover flyouts
+        .app-sidebar-group {
+            position: relative;
+
+            // Declared at every level so the shift measured for one panel cannot
+            // leak into the groups nested inside it; each group's own value
+            // arrives as an inline style, which outranks this
+            --sidebar-flyout-shift: 0px;
+
+            // A flyout opens to the side at every depth, so the chevron keeps
+            // pointing that way even when the group is open
+            > .app-sidebar-link > .app-sidebar-arrow {
+                rotate: 0deg;
+            }
+
+            // Out of flow at all times, so it contributes no height or width to
+            // the rail, and shown by hover alone whatever `is-open` says
+            > .app-sidebar-submenu {
+                position: absolute;
+                inset-inline-start: 100%;
+                // Level with its group unless the script has lifted it to keep it
+                // on screen; nothing scrolls out here to bring an overflow back
+                top: var(--sidebar-flyout-shift);
+                z-index: $sidebar-z-flyout;
+                min-width: 200px;
+                max-height: none;
+                // Guide line and indent do not apply to a panel that is no longer
+                // a nested list
+                margin-inline-start: 0;
+                padding: 0.375rem 0.5rem;
+                border: 1px solid var(--sidebar-border);
+                border-radius: $sidebar-radius;
+                background: var(--sidebar-bg);
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+                opacity: 0;
+                visibility: hidden;
+                overflow: visible;
+                transition:
+                    opacity $sidebar-duration-fast $sidebar-easing,
+                    visibility 0s linear $sidebar-duration-fast;
+
+                // Invisible bridge so a diagonal path keeps the flyout open
+                &::before {
+                    content: '';
+                    position: absolute;
+                    inset-inline-end: 100%;
+                    top: 0;
+                    width: 0.75rem;
+                    height: 100%;
+                }
+
+                .app-sidebar-link {
+                    width: 100%;
+                    margin-inline: 0;
+                }
+
+                .app-sidebar-link-text,
+                .app-sidebar-arrow {
+                    opacity: 1;
+                    transition-delay: 0s;
+                }
+            }
+
+            // `:has(:focus-visible)` rather than `:focus-within`, which a mouse
+            // click on the toggle also satisfies -- and since the toggle does
+            // nothing in the rail, that left the panel pinned open
+            &:hover > .app-sidebar-submenu,
+            &:has(:focus-visible) > .app-sidebar-submenu {
+                opacity: 1;
+                visibility: visible;
+                transition:
+                    opacity $sidebar-duration-fast $sidebar-easing $sidebar-flyout-delay,
+                    visibility 0s linear $sidebar-flyout-delay;
+            }
+        }
+
+        // The nav still scrolls, so a first-level flyout would be clipped if it
+        // were `absolute`. `fixed` escapes that, at the cost of the parent's
+        // coordinates: the rail's outer edge is supplied here, the block offset by
+        // the script. Deeper flyouts stay `absolute`, measured from the panel
+        // above them, which never scrolls.
+        .app-sidebar-links > .app-sidebar-group > .app-sidebar-submenu {
+            position: fixed;
+            inset-inline-start: calc(#{$sidebar-collapsed-width} + #{$sidebar-border-width});
+            top: var(--sidebar-flyout-top, 0px);
+        }
+    }
+}
+
+// The two modes disagree about a submenu's resting opacity -- the accordion
+// leaves it at 1, a closed flyout wants 0 -- so landing `.is-collapsed` would
+// fade a full panel out beside every group. CSS cannot say "do not animate this
+// one change", so the script holds transitions off for the recalc that lands the
+// switch. `!important` outranks the hover and focus rules, which restate it.
+.app-wrapper.is-switching .app-sidebar-submenu {
+    transition: none !important;
+}
+
+// -- Mobile off-canvas drawer ---------------------------------
+
+@media (max-width: $sidebar-breakpoint-max) {
+    .app-sidebar {
+        // `translate` is compositor-only. `visibility` keeps the closed drawer out
+        // of the tab order without blocking the slide-out animation.
+        translate: -100% 0;
+        visibility: hidden;
+        transition:
+            translate $sidebar-duration $sidebar-easing,
+            visibility 0s linear $sidebar-duration;
+    }
+
+    [dir='rtl'] .app-sidebar {
+        translate: 100% 0;
+    }
+
+    .app-wrapper.is-mobile-open .app-sidebar {
+        translate: 0 0;
+        visibility: visible;
+        transition:
+            translate $sidebar-duration $sidebar-easing,
+            visibility 0s linear 0s;
+    }
+}
+
+// -- Mobile backdrop ------------------------------------------
+
+.app-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: $sidebar-z-backdrop;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+
+    @media (max-width: $sidebar-breakpoint-max) {
+        display: block;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+            opacity $sidebar-duration $sidebar-easing,
+            visibility 0s linear $sidebar-duration;
+
+        .app-wrapper.is-mobile-open & {
+            opacity: 1;
+            visibility: visible;
+            transition:
+                opacity $sidebar-duration $sidebar-easing,
+                visibility 0s linear 0s;
+        }
+    }
+}
+
+// -- Main content area ----------------------------------------
+
+.app-main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    min-height: 100vh;
+    margin-inline-start: var(--sidebar-w);
+
+    @media (max-width: $sidebar-breakpoint-max) {
+        --sidebar-w: 0px;
+    }
+}
+
+// -- Top bar --------------------------------------------------
+
+// Sticky rather than fixed: it stays in flow, so it needs no width transition,
+// inset offset or padding compensation on the content.
+.app-topbar {
+    position: sticky;
+    top: 0;
+    z-index: $sidebar-z-topbar;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--sidebar-topbar-height);
+    padding: 0 1.25rem;
+    background: var(--bs-body-bg);
+    border-bottom: 1px solid var(--bs-border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.app-topbar-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: none;
+    border-radius: 0.375rem;
+    background: none;
+    color: var(--bs-body-color);
+    cursor: pointer;
+    transition: background-color $sidebar-duration-fast linear;
+
+    &:hover {
+        background-color: var(--sidebar-hover-bg);
+    }
+}
+
+// Which icon the toggle shows is a statement about which mode the sidebar is in,
+// so the switch is made against this stylesheet's breakpoint rather than
+// Bootstrap's display utilities, which only happen to agree today.
+.app-topbar-toggle-mobile {
+    display: none;
+
+    @media (max-width: $sidebar-breakpoint-max) {
+        display: inline-block;
+    }
+}
+
+.app-topbar-toggle-desktop {
+    display: none;
+
+    @media (min-width: $sidebar-breakpoint) {
+        display: inline-block;
+    }
+}
+
+.app-topbar-start,
+.app-topbar-end {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 0.5rem;
+}
+
+// Icon-only entry for the slots either side of the bar, sized to match the toggle
+// so a row of them lines up with it.
+.app-topbar-action {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.375rem;
+    color: var(--bs-body-color);
+    text-decoration: none;
+    transition: background-color $sidebar-duration-fast linear;
+
+    &:hover,
+    &.active {
+        color: var(--bs-body-color);
+        background-color: var(--sidebar-hover-bg);
+    }
+}
+
+.app-topbar-action-badge {
+    position: absolute;
+    top: 0.125rem;
+    right: 0.125rem;
+    min-width: 1rem;
+    padding: 0 0.25rem;
+    border-radius: 0.5rem;
+    background-color: var(--bs-danger);
+    color: #fff;
+    font-size: 0.625rem;
+    font-weight: 600;
+    line-height: 1rem;
+    text-align: center;
+}
+
+// Dropdown trigger, whatever it opens — account menu, locale picker, and so on.
+// An icon-only trigger squares off to the same footprint as `.app-topbar-action`.
+.app-topbar-dropdown {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.25rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: $sidebar-radius;
+    color: var(--bs-body-color);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color $sidebar-duration-fast linear;
+
+    &:hover,
+    &.show {
+        color: var(--bs-body-color);
+        background-color: var(--sidebar-hover-bg);
+    }
+}
+
+.app-topbar-dropdown-caret {
+    font-size: 0.625rem;
+    opacity: 0.6;
+}
+
+.app-topbar .dropdown-item {
+    padding: 0.5rem 0.75rem;
+    margin: 0.125rem 0.375rem;
+    border-radius: 0.375rem;
+    font-size: 0.9375rem;
+    transition:
+        color $sidebar-duration-fast linear,
+        background-color $sidebar-duration-fast linear;
+
+    // Bootstrap paints `.dropdown-item.active` with a solid `background-color`.
+    // These gradients go in `background-image`, so it has to be cleared or the
+    // text sits on blue-on-blue.
+    &:hover,
+    &.active,
+    &.active:focus {
+        background-color: transparent;
+    }
+
+    &:hover {
+        color: var(--bs-body-color);
+        background-image: linear-gradient(to right, var(--sidebar-hover-bg), transparent);
+    }
+
+    &.active {
+        color: var(--bs-primary);
+        background-image: linear-gradient(to right, rgba(var(--bs-primary-rgb), 0.15), rgba(var(--bs-primary-rgb), 0.02));
+        font-weight: 600;
+    }
+}
+
+// Laid out as a row so the flag centres against the label without depending on
+// the baseline, which shifts as soon as the flag's aspect ratio changes.
+.app-topbar-locale {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+// The flag files are 4:3, and the box has to match or they come out squashed.
+// The width lines up with the `fa-fw` icons in the menus above.
+.app-topbar-locale-flag {
+    width: 1.25rem;
+    height: 0.9375rem;
+    border-radius: 2px;
+    // Flags that run white to the edge (Malaysia's stripes) otherwise dissolve
+    // into the menu background.
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+// -- Page content ---------------------------------------------
+
+.app-content {
+    flex: 1;
+    min-width: 0;
+    padding: 1.5rem;
+    overflow-x: auto;
+
+    @media (min-width: 768px) {
+        padding: 1.75rem 2.5rem 2rem;
+    }
+
+    .page-header {
+        margin-top: 0;
+    }
+}
+
+// -- Footer ---------------------------------------------------
+
+// In flow at the end of the `.app-main` flex column, so it sits at the bottom of
+// short pages and below long ones without reserving a hardcoded gap.
+.app-footer {
+    padding: 0.75rem 1.5rem;
+    border-top: 1px solid var(--bs-border-color);
+    background: var(--bs-body-bg);
+    color: var(--bs-gray-600);
+    font-size: 0.8rem;
+    text-align: center;
+
+    @media (min-width: 768px) {
+        padding: 0.75rem 2.5rem;
+        font-size: 0.9rem;
+    }
+}
