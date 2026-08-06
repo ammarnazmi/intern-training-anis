@@ -11,10 +11,6 @@
                     {{ __('Add Product') }}
                 </a>
             </div>
-
-            <div class="col-md-6">
-                <x-listpage-count :text="__('app.product_count')" :value="$products->total()" />
-            </div>
         </div>
 
         <x-listpage-table>
@@ -37,7 +33,7 @@
                             <td x-text="product.description || '-'"></td>
                             <td class="text-end" x-text="'RM ' + Number(product.price).toFixed(2)"></td>
                             <td class="text-center">
-                                <div class="mx-auto" style="width: 80px">
+                                <div class="mx-auto" style="width: 100px">
                                     <a class="btn btn-outline-dark btn-xs" x-bind:href="zroute('admin.products.show', product.id)">
                                         <span class="far fa-eye fa-fw"></span>
                                     </a>

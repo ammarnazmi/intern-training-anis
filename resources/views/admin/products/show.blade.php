@@ -34,6 +34,9 @@
                         {{ __('Manage Subproducts') }}
                         <span class="badge bg-light text-dark ms-1">{{ $product->subproducts_count ?? 0 }}</span>
                     </a>
+                    <a href="{{ route('admin.products.index', $product) }}" class="btn btn-secondary">
+                        <span class="fas fa-arrow-left"></span> {{ __('Back to Products') }}
+                    </a>
                 </div>
             </div>
         </div>
