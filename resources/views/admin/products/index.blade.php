@@ -11,6 +11,18 @@
                     {{ __('Add Product') }}
                 </a>
             </div>
+            <div class="col-md-6">
+                <x-listpage-count :text="__('app.product_count')" :value="$products->total()" />
+                    [
+                        'name' => __('Name'),
+                        'description' => __('Description'),
+                    ]
+                 " x-model="params.search_column" :selected="request()->query('search_column')" />
+
+                <x-listpage-searchbox class="mb-3" name="search_value" />
+
+                <div>{{ $products->links() }}</div>
+             </div>
         </div>
 
         <x-listpage-table>
@@ -21,7 +33,6 @@
                         <th style="width: 20%"><x-listpage-sorter column="name" :label="__('Name')" /></th>
                         <th><x-listpage-sorter column="description" :label="__('Description')" /></th>
                         <th class="text-end" style="width: 10%"><x-listpage-sorter column="price" :label="__('Price')" /></th>
-                        {{-- <th class="text-center" style="width: 15%">{{ __('Subproducts') }}</th> --}}
                         <th class="text-center" style="width: 15%">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
@@ -32,6 +43,7 @@
                             <td x-text="product.name"></td>
                             <td x-text="product.description || '-'"></td>
                             <td class="text-end" x-text="'RM ' + Number(product.price).toFixed(2)"></td>
+                            <td class="text-center" x-text="product.sub_products_count"></td>
                             <td class="text-center">
                                 <div class="mx-auto" style="width: 100px">
                                     <a class="btn btn-outline-dark btn-xs" x-bind:href="zroute('admin.products.show', product.id)">

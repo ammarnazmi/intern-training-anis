@@ -31,10 +31,10 @@
                 <div class="mt-3">
                     <a href="{{ route('admin.products.subproducts.index', $product) }}" class="btn btn-info">
                         <span class="fas fa-boxes"></span>
-                        {{ __('Manage Subproducts') }}
-                        <span class="badge bg-light text-dark ms-1">{{ $product->subproducts_count ?? 0 }}</span>
+                        {{ __('Manage Sub Products') }}
+                        <span class="badge bg-light text-dark ms-1">{{ $product->sub_products_count ?? 0 }}</span>
                     </a>
-                    <a href="{{ route('admin.products.index', $product) }}" class="btn btn-secondary">
+                    <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">
                         <span class="fas fa-arrow-left"></span> {{ __('Back to Products') }}
                     </a>
                 </div>
