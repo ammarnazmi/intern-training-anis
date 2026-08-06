@@ -57,13 +57,13 @@ Route::middleware(['auth:admin', SetUserLocale::class])->group(function () {
         Route::post('{product}/subproducts', [Admin\SubproductController::class, 'store'])->name('subproducts.store');
     });
 
+    //subproducts
     Route::name('subproducts.')->prefix('subproducts')->group(function () {
         Route::get('{subproduct}', [Admin\SubproductController::class, 'show'])->name('show');
         Route::get('{subproduct}/edit', [Admin\SubproductController::class, 'edit'])->name('edit');
         Route::put('{subproduct}', [Admin\SubproductController::class, 'update'])->name('update');
         Route::delete('{subproduct}', [Admin\SubproductController::class, 'destroy'])->name('destroy');
     });
-
 
     // Profile
     Route::name('profile.')->prefix('profile')->group(function () {
