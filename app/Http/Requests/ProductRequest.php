@@ -26,5 +26,6 @@ class ProductRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0', 'max:999999.99'],
         ];
+
     }
 }
