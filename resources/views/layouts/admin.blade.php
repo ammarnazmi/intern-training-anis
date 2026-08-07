@@ -15,4 +15,5 @@
 @section('sidebar-menu')
     <x-sidebar.link route="admin.main" icon="fa-gauge-high">{{ __('Main') }}</x-sidebar.link>
     <x-sidebar.link route="admin.users.index" active="admin.users.*" icon="fa-users">{{ __('Users') }}</x-sidebar.link>
+    <x-sidebar.link route="admin.products.index" active="admin.products.*" icon="fa-boxes">{{ __('Products') }}</x-sidebar.link>
 @endsection
