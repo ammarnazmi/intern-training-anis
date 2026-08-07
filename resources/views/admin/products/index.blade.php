@@ -13,17 +13,10 @@
             </div>
             <div class="col-md-6">
                 <x-listpage-count :text="__('app.product_count')" :value="$products->total()" />
-                    [
-                        'name' => __('Name'),
-                        'description' => __('Description'),
-                    ]
-                " x-model="params.search_column" :selected="request()->query('search_column')" />
 
                 <x-listpage-searchbox class="mb-3" name="search_value" />
-                <div>{{ $products->links() }}</div>
              </div>
         </div>
-
         <x-listpage-table>
             <table class="table table-sm table-bordered table-hover">
                 <thead>

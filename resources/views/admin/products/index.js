@@ -5,15 +5,12 @@ Alpine.data('ListPage', () =>
         defaultParams: {
             page: 1,
             sort: '-id',
-        },
-        defaultParams: {
-              page: 1,
-             search_column: {
+            search_column: {
                  depends: 'search_value',
                  value: 'name',
              },
-             search_value: '',
-              sort: '-id',
+            search_value: '',
+            sort: '-id',
           },
         remove(product) {
             abmodal({

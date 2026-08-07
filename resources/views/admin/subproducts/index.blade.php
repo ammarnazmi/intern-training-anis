@@ -19,6 +19,7 @@
                 <x-listpage-count :text="__('app.subproduct_count')" :value="$subproducts->total()" />
             </div>
         </div>
+        <x-listpage-searchbox class="mb-3" name="search_value" />
         <x-listpage-table>
             <table class="table table-sm table-bordered table-hover">
                 <thead>
