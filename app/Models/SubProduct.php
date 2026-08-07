@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
-class Subproduct extends Model
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Onpay\Core\Eloquent\Concerns\SortStringResolver;
+use Onpay\Core\Eloquent\Concerns\ValueSearcher;
+class SubProduct extends Model
 {
-    protected $table = 'sub_products';
+
+    use HasFactory, SortStringResolver, ValueSearcher;
 
     protected $fillable = [
         'product_id',
@@ -16,12 +19,16 @@ class Subproduct extends Model
         'price',
     ];
 
-    protected $casts = [
-        'price' => 'decimal:2',
-    ];
 
-    public function product(): BelongsTo
+    /**
+    * Get the attributes that should be cast.
+    *
+    * @return array<string, string>
+    */
+    protected function casts(): array
     {
-        return $this->belongsTo(Product::class);
+        return [
+            'price' => 'decimal:2',
+        ];
     }
 }
