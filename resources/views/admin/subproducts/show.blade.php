@@ -6,7 +6,7 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">{{ __('Subproduct Details') }}</h5>
+                <h5 class="mb-0">{{ __('Sub Product Details') }}</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -39,7 +39,7 @@
                             <tr>
                                 <th>{{ __('Updated At') }}</th>
                                 <td>{{ $subproduct->updated_at }}</td>
-                            </tr> 
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -53,36 +53,3 @@
     </div>
 @endsection
 
-@push('js')
-    <script>
-        function deleteSubproduct(id) {
-            abmodal({
-                message: '{{ __("Do you want to delete this subproduct?") }}',
-                onEscape: true,
-                buttons: {
-                    yes: {
-                        label: '{{ __("Yes") }}',
-                        className: 'btn-danger',
-                        callback: () => {
-                            Helper.showPageSpinner();
-                            axios.delete('/admin/subproducts/' + id)
-                                .then(() => {
-                                    Helper.showNotificationSuccess('{{ __("Subproduct deleted successfully.") }}');
-                                    window.location.href = '{{ route("admin.products.subproducts.index", $subproduct->product) }}';
-                                })
-                                .catch((error) => {
-                                    Helper.showNotificationError(error.response?.data?.message || '{{ __("Failed to delete subproduct.") }}');
-                                })
-                                .finally(() => {
-                                    Helper.removePageSpinner();
-                                });
-                        },
-                    },
-                    no: {
-                        label: '{{ __("No") }}',
-                    },
-                },
-            });
-        }
-    </script>
-@endpush

@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Product;
 use Onpay\Core\Http\FormRequest;
 
 class ProductRequest extends FormRequest
@@ -22,40 +21,13 @@ class ProductRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rules = [
+        return [
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0', 'max:999999.99'],
         ];
 
-        return $rules;
+
     }
 
-    /**
-     * Get the validated data from the request.
-     *
-     * @param  array|int|string|null  $key
-     * @param  mixed  $default
-     * @return mixed
-     */
-    public function validated($key = null, $default = null)
-    {
-        $validated = $this->validator->validated();
-        return data_get($validated, $key, $default);
-    }
-
-    /**
-     * Prepare the data for validation.
-     */
-    protected function prepareForValidation(): void
-    {
-        $data = [];
-
-        // Check if product exists in conditions
-        if ($this->conditions && isset($this->conditions->product)) {
-            $this->conditions->id = $this->conditions->product->id ?? null;
-        }
-
-        $this->merge($data);
-    }
 }

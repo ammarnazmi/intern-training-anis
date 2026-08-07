@@ -15,6 +15,9 @@
                     {{ __('Back to Product') }}
                 </a>
             </div>
+            <div class="col-md-6">
+                <x-listpage-count :text="__('app.subproduct_count')" :value="$subproducts->total()" />
+            </div>
         </div>
         <x-listpage-table>
             <table class="table table-sm table-bordered table-hover">

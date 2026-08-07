@@ -62,7 +62,7 @@
     <script type="text/javascript">
         Alpine.data('Form', () =>
             window.AlpineComponents.Form({
-                formRequest: {!! \App\Http\Requests\SubproductRequest::extractJson() !!},
+                formRequest: {!! \App\Http\Requests\SubProductRequest::extractJson() !!},
             })
         );
     </script>
