@@ -13,13 +13,26 @@ class SubProductController extends Controller
     /**
      * Display a listing of the subproducts for a product.
      */
-    public function index(Product $product)
+    public function index(Request $request, Product $product)
     {
-        $subproducts = $product->subProducts()
-            ->orderBy('id', 'desc')
-            ->paginate(25);
+         $searchColumn = $request->query('search_column');
+        $searchValue = $request->query('search_value');
+        $sort = $request->query('sort');
 
-        return view('admin.subproducts.index', compact('product', 'subproducts'));
+        $query = $product->subProducts();
+
+        $validSearchColumns = ['name', 'description'];
+        $query->searchWildcard($searchValue, in_array($searchColumn, $validSearchColumns) ? $searchColumn : null);
+
+        $validSortColumns = ['id', 'name', 'description', 'price', 'created_at'];
+        $query->resolveSortString($sort, 'id', 'desc', $validSortColumns);
+
+        $subproducts = $query->paginate(25)
+            ->withIndexPathAndQueryString();
+
+        return $request->wantsJson()
+            ? $subproducts
+            : view('admin.subproducts.index', compact('product', 'subproducts'));
     }
 
     /**
@@ -45,44 +58,38 @@ class SubProductController extends Controller
     /**
      * Display the specified subproduct.
      */
-    public function show(SubProduct $subproduct)
+    public function show(Product $product, SubProduct $subproduct)
     {
         $subproduct->load('product');
-        return view('admin.subproducts.show', compact('subproduct'));
+        return view('admin.subproducts.show', compact('product', 'subproduct'));
     }
 
     /**
      * Show the form for editing the specified subproduct.
      */
-    public function edit(SubProduct $subproduct)
+    public function edit(Product $product, SubProduct $subproduct)
     {
-        $product = $subproduct->product;
         return view('admin.subproducts.form', compact('product', 'subproduct'));
     }
 
     /**
      * Update the specified subproduct in storage.
      */
-    public function update(SubProductRequest $request, SubProduct $subproduct)
+    public function update(SubProductRequest $request,  Product $product, SubProduct $subproduct)
     {
         $subproduct->update($request->validated());
 
-        return redirect(route('admin.products.subproducts.index', $subproduct->product))
+        return redirect(route('admin.products.subproducts.index', $product))
             ->withSuccessNotification(__('Subproduct :name has been updated successfully.', ['name' => e($subproduct->name)]));
     }
 
     /**
      * Remove the specified subproduct from storage.
      */
-    public function destroy(SubProduct $subproduct)
+    public function destroy(Request $request, Product $product, SubProduct $subproduct)
     {
         $subproduct->delete();
 
-        if (request()->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return redirect()->back()
-            ->withSuccessNotification(__('Subproduct deleted successfully.'));
+        return $this->index($request, $product);
     }
 }

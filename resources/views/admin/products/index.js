@@ -21,11 +21,13 @@ Alpine.data('ListPage', () =>
                         label: __('Yes'),
                         className: 'btn-danger',
                         callback: () => {
-                            Helper.showNotificationSuccess(
-                                __('Product :name has been deleted successfully.', {
-                                    name: eh(product.name)
-                                })
-                            );
+                            this.deleteItem(product, () => {
+                                Helper.showNotificationSuccess(
+                                    __('Product :name has been deleted successfully.', {
+                                        name: eh(product.name)
+                                    })
+                                );
+                            });
                         }
                     },
                     no: {

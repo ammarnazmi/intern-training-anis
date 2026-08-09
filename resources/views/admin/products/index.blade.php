@@ -25,6 +25,7 @@
                         <th style="width: 20%"><x-listpage-sorter column="name" :label="__('Name')" /></th>
                         <th><x-listpage-sorter column="description" :label="__('Description')" /></th>
                         <th class="text-end" style="width: 10%"><x-listpage-sorter column="price" :label="__('Price')" /></th>
+                        <th class="text-center" style="width: 10%"><x-listpage-sorter column="sub_products_count" :label="__('Subproducts')" /></th>
                         <th class="text-center" style="width: 15%">{{ __('Actions') }}</th>
                     </tr>
                 </thead>

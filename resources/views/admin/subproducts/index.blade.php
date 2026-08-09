@@ -50,10 +50,10 @@
                             <td class="text-end" x-text="'RM ' + Number(subproduct.price).toFixed(2)"></td>
                             <td class="text-center">
                                 <div class="mx-auto" style="width: 100px">
-                                    <a class="btn btn-outline-dark btn-xs" x-bind:href="zroute('admin.subproducts.show', subproduct.id)">
+                                    <a class="btn btn-outline-dark btn-xs" x-bind:href="zroute('admin.products.subproducts.show', [product, subproduct.id])">
                                         <span class="far fa-eye fa-fw"></span>
                                     </a>
-                                    <a class="btn btn-outline-dark btn-xs" x-bind:href="zroute('admin.subproducts.edit', subproduct.id)">
+                                    <a class="btn btn-outline-dark btn-xs" x-bind:href="zroute('admin.products.subproducts.edit', [product, subproduct.id])">
                                         <span class="far fa-edit fa-fw"></span>
                                     </a>
                                     <button class="btn btn-outline-danger btn-xs" x-on:click="remove(subproduct)">

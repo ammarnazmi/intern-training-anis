@@ -1,19 +1,16 @@
 Alpine.data('SubproductListPage', () =>
     window.AlpineComponents.ListPage({
         data: PageData.subproducts,
+        product: PageData.product.id,
 
         defaultParams: {
             page: 1,
             sort: '-id',
-        },
-        defaultParams: {
-              page: 1,
-             search_column: {
-                 depends: 'search_value',
-                 value: 'name',
+            search_column: {
+                depends: 'search_value',
+                value: 'name',
              },
              search_value: '',
-              sort: '-id',
           },
         remove(subproduct) {
             abmodal({
@@ -24,11 +21,13 @@ Alpine.data('SubproductListPage', () =>
                         label: __('Yes'),
                         className: 'btn-danger',
                         callback: () => {
-                            Helper.showNotificationSuccess(
-                                __('Sub Product :name has been deleted successfully.', {
-                                    name: eh(subproduct.name)
-                                })
-                            );
+                            this.deleteItem(subproduct, () => {
+                                Helper.showNotificationSuccess(
+                                    __('Subproduct :name has been deleted successfully.', {
+                                        name: eh(subproduct.name)
+                                    })
+                                );
+                            });
                         }
                     },
                     no: {
