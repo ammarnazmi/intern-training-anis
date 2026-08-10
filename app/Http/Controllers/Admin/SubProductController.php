@@ -60,7 +60,6 @@ class SubProductController extends Controller
      */
     public function show(Product $product, SubProduct $subproduct)
     {
-        $subproduct->load('product');
         return view('admin.subproducts.show', compact('product', 'subproduct'));
     }
 
