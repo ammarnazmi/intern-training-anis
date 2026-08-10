@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Onpay\Core\Eloquent\Concerns\SortStringResolver;
 use Onpay\Core\Eloquent\Concerns\ValueSearcher;
+
 class SubProduct extends Model
 {
 
@@ -31,6 +32,7 @@ class SubProduct extends Model
             'price' => 'decimal:2',
         ];
     }
+
      /**
      * Get the product that owns the sub product.
      *
