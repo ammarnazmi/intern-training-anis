@@ -1,29 +1,30 @@
-Alpine.data('ListPage', () =>
+Alpine.data('SubproductListPage', () =>
     window.AlpineComponents.ListPage({
-        data: PageData.products,
+        data: PageData.subproducts,
+        product: PageData.product.id,
 
         defaultParams: {
             page: 1,
             sort: '-id',
             search_column: {
-                 depends: 'search_value',
-                 value: 'name',
+                depends: 'search_value',
+                value: 'name',
              },
-            search_value: '',
+             search_value: '',
           },
-        remove(product) {
+        remove(subproduct) {
             abmodal({
-                message: __('Do you want to delete this product?') + '<br>' + eh(product.name) + '<br><br><span class="text-danger">' + __('All related subproducts will also be deleted.') + '</span>',
+                message: __('Do you want to delete this subproduct?') + '<br>' + eh(subproduct.name),
                 onEscape: true,
                 buttons: {
                     yes: {
                         label: __('Yes'),
                         className: 'btn-danger',
                         callback: () => {
-                            this.deleteItem(product, () => {
+                            this.deleteItem(subproduct, () => {
                                 Helper.showNotificationSuccess(
-                                    __('Product :name has been deleted successfully.', {
-                                        name: eh(product.name)
+                                    __('Subproduct :name has been deleted successfully.', {
+                                        name: eh(subproduct.name)
                                     })
                                 );
                             });

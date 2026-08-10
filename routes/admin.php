@@ -51,19 +51,9 @@ Route::middleware(['auth:admin', SetUserLocale::class])->group(function () {
     //products
     Route::resource('products', Admin\ProductController::class);
 
-    Route::name('products.')->prefix('products')->group(function () {
-        Route::get('{product}/subproducts', [Admin\SubproductController::class, 'index'])->name('subproducts.index');
-        Route::get('{product}/subproducts/create', [Admin\SubproductController::class, 'create'])->name('subproducts.create');
-        Route::post('{product}/subproducts', [Admin\SubproductController::class, 'store'])->name('subproducts.store');
-    });
 
-    Route::name('subproducts.')->prefix('subproducts')->group(function () {
-        Route::get('{subproduct}', [Admin\SubproductController::class, 'show'])->name('show');
-        Route::get('{subproduct}/edit', [Admin\SubproductController::class, 'edit'])->name('edit');
-        Route::put('{subproduct}', [Admin\SubproductController::class, 'update'])->name('update');
-        Route::delete('{subproduct}', [Admin\SubproductController::class, 'destroy'])->name('destroy');
-    });
-
+    //subproducts
+    Route::resource('products.subproducts', Admin\SubProductController::class);
 
     // Profile
     Route::name('profile.')->prefix('profile')->group(function () {

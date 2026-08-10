@@ -13,18 +13,10 @@
             </div>
             <div class="col-md-6">
                 <x-listpage-count :text="__('app.product_count')" :value="$products->total()" />
-                    [
-                        'name' => __('Name'),
-                        'description' => __('Description'),
-                    ]
-                 " x-model="params.search_column" :selected="request()->query('search_column')" />
 
                 <x-listpage-searchbox class="mb-3" name="search_value" />
-
-                <div>{{ $products->links() }}</div>
              </div>
         </div>
-
         <x-listpage-table>
             <table class="table table-sm table-bordered table-hover">
                 <thead>
@@ -33,6 +25,7 @@
                         <th style="width: 20%"><x-listpage-sorter column="name" :label="__('Name')" /></th>
                         <th><x-listpage-sorter column="description" :label="__('Description')" /></th>
                         <th class="text-end" style="width: 10%"><x-listpage-sorter column="price" :label="__('Price')" /></th>
+                        <th class="text-center" style="width: 10%"><x-listpage-sorter column="sub_products_count" :label="__('Subproducts')" /></th>
                         <th class="text-center" style="width: 15%">{{ __('Actions') }}</th>
                     </tr>
                 </thead>

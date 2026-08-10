@@ -32,4 +32,14 @@ class SubProduct extends Model
             'price' => 'decimal:2',
         ];
     }
+
+     /**
+     * Get the product that owns the sub product.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Product, $this>
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
 }

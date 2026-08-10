@@ -26,7 +26,7 @@ class ProductController extends Controller
 
         // Sort
         $validSortColumns = ['id', 'name', 'description', 'price', 'created_at'];
-        $query->resolveSortString($sort, $validSortColumns, 'id', 'desc', $validSortColumns);
+        $query->resolveSortString($sort, 'id', 'desc', $validSortColumns);
 
         $columns = ['id', 'name', 'description', 'price', 'created_at', 'updated_at'];
 
