@@ -10,7 +10,6 @@ Alpine.data('ListPage', () =>
                  value: 'name',
              },
             search_value: '',
-            sort: '-id',
           },
         remove(product) {
             abmodal({
